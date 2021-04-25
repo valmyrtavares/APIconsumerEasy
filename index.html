@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Lista de games</h1>
+    <ul id="lista"></ul>
+   
+    
+    <h1>Criar Game</h1>
+    <input type="text" id="title" name="title" placeholder="Titulo"><br>
+    <input type="number" id="year" name="year" placeholder="Ano"><br>
+    <input type="number" id="price" name="price" placeholder="Preço"><br>
+    <button onclick="createGames()">Criar</button>
+    
+    <h1>Editar Game</h1>
+    <input type="text" id="titleEdit" name="title" ><br>
+    <input type="number" id="yearEdit" name="year" ><br>
+    <input type="number" id="priceEdit" name="price" ><br>
+    <input type="hidden" id="idEdit" name="id">
+    <button onclick="editGame()">Editar</button>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+<!-- +++++++++++++++++ JAVASCRIPT *************************  -->
+
+<script>
+
+    // *************CARRETAR DADOS DOS GAMES********************
+
+    function LoadForm(item){
+        var id = item.getAttribute("data-id")
+        var title = item.getAttribute("data-title")
+        var year = item.getAttribute("data-year")
+        var price = item.getAttribute("data-price")
+
+        document.getElementById("titleEdit").value = title;
+        document.getElementById("yearEdit").value = year;
+        document.getElementById("priceEdit").value = price;
+        document.getElementById("idEdit").value = id;
+
+    }
+
+    // *************EDITAR GAMES********************
+    function editGame(){
+        var titleinput = document.getElementById("titleEdit").value
+        var yearinput = document.getElementById("yearEdit").value
+        var priceinput = document.getElementById("priceEdit").value
+        var id = document.getElementById("idEdit").value
+
+        var gameEdited = {
+            title: titleinput,
+            year: yearinput,
+            price: priceinput
+        }
+        axios.put(`http://localhost:1800/game/${id}` ,gameEdited).then(response =>{
+            if(response.status==200){
+                console.log("Game Cadastrado")
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+       
+    }
+
+
+    // **************CRIAR GAMES********************
+
+    function createGames(){
+        var titleinput = document.getElementById("title")
+        var yearinput = document.getElementById("year")
+        var priceinput = document.getElementById("price")
+        
+        var game = {
+            title: title.value,
+            year: yearinput.value,
+            price: priceinput.value
+        }
+        
+        axios.post("http://localhost:1800/game",game).then(response =>{
+            if(response.status==200){
+                console.log("Game Cadastrado")
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+       
+    }
+
+    // **************EXCLUIR GAMES********************
+
+    function deletarItem(item){
+        var id = item.getAttribute("data-id")
+       axios.delete(`http://localhost:1800/game/${id}`)      
+       .then(response =>{
+            alert("Game Deletado")
+        }).catch(err =>{
+            alert(err)
+        })
+       
+    }
+
+     // **************TRAZER GAMES********************
+
+    function carregandoDados(){
+        axios.get("http://localhost:1800/games").then(request =>{
+           var games = request.data
+           var list = document.getElementById("lista")
+   
+          
+           games.forEach(game =>{
+               var item = document.createElement("li")
+               item.setAttribute("data-id",game.id)
+               item.setAttribute("data-title",game.title)
+               item.setAttribute("data-year",game.year)
+               item.setAttribute("data-price",game.price)
+               item.innerHTML = game.title + " " + "No ano de " + game.year + " " + "R$" + game.price
+               list.appendChild(item)
+   
+               var deleteBtn = document.createElement("button")
+               deleteBtn.innerHTML = "Deletar";
+               deleteBtn.addEventListener("click",()=>{deletarItem(item)})
+               list.appendChild(deleteBtn)
+   
+               var editBtn = document.createElement("button")
+               editBtn.innerHTML = "Editar";
+               editBtn.addEventListener("click", ()=>{
+                   LoadForm(item)
+               })
+               list.appendChild(editBtn)
+           })
+   
+   
+       }).catch(err=>{
+           console.log(err)
+       })
+    }
+    carregandoDados()
+   
+</script>
+</html > 
